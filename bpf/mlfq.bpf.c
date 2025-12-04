@@ -74,8 +74,19 @@ void BPF_STRUCT_OPS(mlfq_enqueue, struct task_struct *p, u64 enq_flag)
         slice = &s; 
     }
 
-    scx_bpf_dsq_insert(p, *level, *slice, emq_flags); 
+    scx_bpf_dsq_insert(p, *level, *slice, emq_flags);   //Insert a task into DSQ (Dispatch Queue)
 }
+// Dispatch callback
+/*
+    Dispatch Queue from high to low
+*/
+void BPF_STRUCT_OPS(mlfq_dispatch, s32 cpu, struct task_struct *prev){
+     for(int lvl = 0; lvl <NUM_DSQ; lvl++){
+        if(scx_bpf_dsq_move_to_local(lvl))
+            return; 
+     }
+}
+
 
 struct sched_ext_ops mlfq_ops = {
     .enable   = (void *)mlfq_enable,
