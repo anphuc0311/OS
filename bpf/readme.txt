@@ -1,3 +1,65 @@
+1.
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 4096);
+    __type(key, u32);   /* pid */
+    __type(value, u64); /* remaining slice ns */
+} task_slice SEC(".maps");
+Nhiệm vụ: Map lưu trữ thời gian còn lại của một tiến trình được phục vụ. 
+Giải thích chi tiết: 
+    BPF_MAP_TYPE_HASH: Map dựa trên tìm kiểu dữ liệu kiểm hàm băm. 
+    max_entries, 4096: Có tối đa 4096 task. 
+    key: Khóa pid trên map của các tiến trình. 
+    value: Giá trị biểu thị thời gian còn lại của tiến trình. 
+Vai trò: Sử dụng trong mlfq_running để tính toán thời gian chạy để quyết định có demote tiến trình hay không. 
+
+2. 
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 4096);
+    __type(key, u32);   /* pid */
+    __type(value, u32); /* queue level */
+} task_queue SEC(".maps");
+Nhiệm vụ: Lưu trữ các queue level mà các tác vụ được gán, xác định mức ưu tiên của nó. 
+    value: Giá trị biểu thị mức ưu tiên của queue. 
+Vai trò: Sử dụng trong mlfq_running để promote/demote cho các tác vụ 
+         Trong các hàm điều phối dispatch, enqueue để biết các tác vụ thuộc hàng đợi nào? 
+
+3.
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 4096);
+    __type(key, u32);   /* pid */
+    __type(value, u64); /* start time ns */
+} task_start_ns SEC(".maps");
+Nhiệm vụ: Lưu trữ thời gian khi một tác vụ bắt đầu chạy trên CPU. 
+    value: Thời gian hệ thống khi các tác vụ thực thi. 
+Vai trò: Tính toán lượng thời gian các tác vụ chạy giữa 2 điểm thời gian. 
+
+4. 
+void BPF_STRUCT_OPS(mlfq_enable, struct task_struct *p,
+                    struct scx_enable_args *args)
+{
+    bpf_printk("Task %s enabled in MLFQ", p->comm);
+    u32 pid = p->pid;
+    u64 slice = SLICE_NS[DSQ_HIGH];
+
+    bpf_map_update_elem(&task_slice, &pid, &slice, BPF_ANY);
+    u32 level = DSQ_HIGH;
+    bpf_map_update_elem(&task_queue, &pid, &level, BPF_ANY);
+}
+Nhiệm vụ: Khởi tạo trạng thái ban đầu cho một tác vụ khi nó được thêm vào. 
+Mục tiêu: Đảm bảo rằng mọi tác vụ mới được quản lý bởi MLFQ đều bắt đầu ở mức ưu tiên cao nhất
+Giải thích chi tiết: 
+    BPF_STRUCT_OPS: Là một Macro được sử dụng trong lập trình eBPF (extended Berkeley Packet Filter)
+                    Chức năng: Khai báo và định nghĩa 1 hàm callaback cụ thể trong 1 tập hợp các hoạt động cấu trúc.
+                    Struct Ops là một cơ chế trong Nhân Linux cho phép các module (ở đây là chương trình BPF) cung cấp các hàm thay thế (overridden functions) cho các thao tác chuẩn của hệ thống.            
+    1. void BPF_STRUCT_OPS(mlfq_enable, struct task_struct *p,
+       struct scx_enable_args *args): Khai báo hàm callback enable. Hàm này được  gọi khi hệ thống quyết định 1 tác vụ nên được chuyển sang quản lý bởi bộ lập lịch BPF này.
+    u32 pid = p->pid: Lấy pid của tác vụ được thêm vào. 
+    u64 slice = SLICE_NS[DSQ_HIGH]: Thiết lập giá trị thời gian slice ban đầu (mức priority cao nhất)
+    bpf_map_update_elem(&task_slice, &pid, &slice, BPF_ANY): Lưu trữ thời gian slice  
+
 1. 
 void BPF_STRUCT_OPS(mlfq_dispatch, s32 cpu, struct task_struct *prev){
      for(int lvl = 0; lvl < NUM_DSQ; lvl++){
@@ -47,4 +109,22 @@ nó xuống hàng đợi ưu tiên thấp hơn khi nó sử dụng hết thời 
     u32 pid = p->pid
 - Tìm kiếm BPF map "task_slice" lưu trữ thông tin thời gian sử dụng còn lại của mỗi tiến trình. 
     bpf_map_lookup_elem(&task_slice, &pid)
+Thiết lập time slice ban đầu: 
+    u64 slice = SLICE_NS[DSQ_HIGH]: Mặc định timeslice cho queue có priority cao nhất.
+if (slice && *slice > 0): Chạy tiếp trong điều kiện tồn tại slice và timeslice >0 của task.
+*slice -= SLICE_NS[DSQ_HIGH]; // approximation: Giảm thời gian task sau mỗi lần chạy.
+    tìm cách sử dụng task_start_ns để tinhstoans chính xác.
+-Kích hoạt cơ chế hạ cấp: 
+    if (*slice == 0){
+        u32 *level = bpf_map_lookup_elem(&task_queue, &pid);
+        if (level && *level < DSQ_LOWEST){
+Giải thích: Nếu thời gian slice của một task đã hết thì nhảy xuống dưới 
+    u32 *level = bpf_map_lookup_elem(&task_queue, &pid): Tra mức ưu tiên hiện tại trong bpf map task_queue
+    if (level && *level < DSQ_LOWEST): Nếu tác vụ tồn tại và < mức ưu tiên thấp nhất thì: 
+(*level)++: Tăng chỉ số ( giảm mức ưu tiên)
+- Cập nhật trạng thái theo time slice mới: 
+    u64 new_slice = SLICE_NS[*level];
+    bpf_map_update_elem(&task_slice, &pid, &new_slice, BPF_ANY);
+    bpf_map_update_elem(&task_queue, &pid, level, BPF_ANY);
+
     
