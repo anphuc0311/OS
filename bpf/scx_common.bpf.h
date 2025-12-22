@@ -12,7 +12,7 @@
 
 /* 2. Khai báo các hàm kfuncs còn thiếu trong mã của bạn */
 extern s32 scx_bpf_create_dsq(u64 dsq_id, s32 node) __ksym __weak;
-extern s32 scx_bpf_task_cpu(struct task_struct *p) __ksym __weak;
+extern s32 scx_bpf_task_cpu(const struct task_struct *p) __ksym __weak;
 extern void scx_bpf_dispatch(struct task_struct *p, u64 dsq_id, u64 slice, u64 enq_flags) __ksym __weak;
 extern bool scx_bpf_consume(u64 dsq_id) __ksym __weak;
 extern void scx_bpf_kick_cpu(s32 cpu, u64 flags) __ksym __weak;

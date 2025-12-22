@@ -133,7 +133,7 @@ s32 mlfq_init_task(struct task_struct *p, struct scx_init_task_args *args){
 /* --- EXIT TASK --- */
 //void BPF_STRUCT_OPS(mlfq_exit_task, struct task_struct *p) {
 void BPF_STRUCT_OPS(mlfq_exit_task,
-                    struct task_struct *p,
+                    const struct task_struct *p,
                     struct scx_exit_task_args *args){
     if(!p) return;
     s32 pid = BPF_CORE_READ(p, pid);
@@ -145,7 +145,7 @@ void BPF_STRUCT_OPS(mlfq_exit_task,
     bpf_map_delete_elem(&task_enq_ns, &pid);
 
     /* Safe CPU cleanup */
-    s32 cpu_of_task = BPF_CORE_READ(p, thread_info.cpu) /*scx_bpf_task_cpu(p)*/;
+    s32 cpu_of_task = BPF_CORE_READ(p, thread_info.cpu); // scx_bpf_task_cpu((const struct task_struct *)p);
     if (cpu_of_task >= 0 && cpu_of_task < MAX_CPUS) {
         u32 cpu_idx = (u32)cpu_of_task;
         s32 *curr = bpf_map_lookup_elem(&cpu_curr_pid, &cpu_idx);
@@ -174,16 +174,16 @@ void BPF_STRUCT_OPS(mlfq_enable, struct task_struct *p) {
 
 /* --- ENQUEUE --- */
 SEC("struct_ops/mlfq_enqueue")
-//void mlfq_enqueue(struct task_struct *p, u64 enq_flags)
-u64 BPF_STRUCT_OPS(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
+void BPF_PROG(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
+//u64 BPF_STRUCT_OPS(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
 {
     //if (!p) return 0 ;
     //s32 pid = /*BPF_CORE_READ(p, pid);*/ p->pid;
     //if (pid == 0) return 0; /* Skip swapper explicitly */
-    //u64 flags = enq_flags & 0xffffffffULL;
-    /*s32 pid = bpf_get_current_pid_tgid() & 0xFFFFFFFF;
+    u64 flags = (u64)enq_flags;
+    s32 pid = bpf_get_current_pid_tgid() & 0xFFFFFFFF;
     if (pid == 0)  
-        return 0 ;
+        return  ;
 
     
     u64 now = bpf_ktime_get_ns();
@@ -201,11 +201,11 @@ u64 BPF_STRUCT_OPS(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
     } else {
         bpf_map_update_elem(&task_queue, &pid, &lvl, BPF_ANY);
         bpf_map_update_elem(&task_slice, &pid, &slice, BPF_ANY);
-    }*/
+    }
 
     
-    //scx_bpf_dsq_insert(p, DSQ_HIGHEST, /*lvl,slice*/5000000ULL, enq_flags);
-    /*int cpu = BPF_CORE_READ(p, thread_info.cpu);
+    scx_bpf_dispatch(p, lvl,slice, enq_flags);
+    int cpu = BPF_CORE_READ(p, thread_info.cpu);
     if (cpu >= 0 && cpu < MAX_CPUS) {
         u32 cpu_idx = (u32)cpu;
         s32 *curr_pid_ptr = bpf_map_lookup_elem(&cpu_curr_pid, &cpu_idx);
@@ -220,8 +220,8 @@ u64 BPF_STRUCT_OPS(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
                 scx_bpf_kick_cpu(cpu, SCX_KICK_PREEMPT);
             }
         }
-    }*/
-    return 0 ;
+    }
+    return  ;
 }
 
 /* --- DISPATCH --- */
@@ -283,7 +283,7 @@ void BPF_STRUCT_OPS(mlfq_dispatch, s32 cpu, struct task_struct *prev)
 
     /* Dispatch tasks */
     for (int i = 0; i < NUM_DSQ; i++) {
-       // if (scx_bpf_dsq_move_to_local(i))
+        if (scx_bpf_consume(i))
             return;
     }
 }
@@ -391,7 +391,7 @@ struct sched_ext_ops mlfq_ops = {
     .stopping   = mlfq_stopping,
     .running    = mlfq_running,
     .exit       = mlfq_exit,
-    .exit_task  = mlfq_exit_task,
+    .exit_task  = (void *)mlfq_exit_task,
     .name       = "mlfq",
     .flags      = SCX_OPS_KEEP_BUILTIN_IDLE,
 };

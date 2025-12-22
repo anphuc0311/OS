@@ -48213,22 +48213,22 @@ struct dma_heap_allocation_data {
 	__u64 heap_flags;
 };
 
+struct dma_heap_attachment {
+	struct device *dev;
+	struct sg_table *table;
+	struct list_head list;
+	bool mapped;
+};
+
 struct sg_table {
 	struct scatterlist *sgl;
 	unsigned int nents;
 	unsigned int orig_nents;
 };
 
-struct dma_heap_attachment {
-	struct device *dev;
-	struct sg_table table;
-	struct list_head list;
-	bool mapped;
-};
-
 struct dma_heap_attachment___2 {
 	struct device *dev;
-	struct sg_table *table;
+	struct sg_table table;
 	struct list_head list;
 	bool mapped;
 };
@@ -124131,11 +124131,11 @@ typedef void (*xhci_get_quirks_t)(struct device *, struct xhci_hcd *);
 
 typedef struct rpc_xprt * (*xprt_switch_find_xprt_t)(struct rpc_xprt_switch *, const struct rpc_xprt *);
 
-struct nfsd_file;
-
 struct dwc_thread;
 
 typedef struct dwc_thread dwc_thread_t;
+
+struct nfsd_file;
 
 typedef void *acpi_handle;
 
@@ -124154,6 +124154,169 @@ struct pctldev;
 
 /* BPF kfuncs */
 #ifndef BPF_NO_KFUNC_PROTOTYPES
+extern void *bpf_arena_alloc_pages(void *p__map, void *addr__ign, u32 page_cnt, int node_id, u64 flags) __weak __ksym;
+extern void bpf_arena_free_pages(void *p__map, void *ptr__ign, u32 page_cnt) __weak __ksym;
+extern void *bpf_cast_to_kern_ctx(void *obj) __weak __ksym;
+extern struct cgroup *bpf_cgroup_acquire(struct cgroup *cgrp) __weak __ksym;
+extern struct cgroup *bpf_cgroup_ancestor(struct cgroup *cgrp, int level) __weak __ksym;
+extern struct cgroup *bpf_cgroup_from_id(u64 cgid) __weak __ksym;
+extern void bpf_cgroup_release(struct cgroup *cgrp) __weak __ksym;
+extern int bpf_copy_from_user_str(void *dst, u32 dst__sz, const void *unsafe_ptr__ign, u64 flags) __weak __ksym;
+extern struct bpf_cpumask *bpf_cpumask_acquire(struct bpf_cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_and(struct bpf_cpumask *dst, const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern u32 bpf_cpumask_any_and_distribute(const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern u32 bpf_cpumask_any_distribute(const struct cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_clear(struct bpf_cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_clear_cpu(u32 cpu, struct bpf_cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_copy(struct bpf_cpumask *dst, const struct cpumask *src) __weak __ksym;
+extern struct bpf_cpumask *bpf_cpumask_create(void) __weak __ksym;
+extern bool bpf_cpumask_empty(const struct cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_equal(const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern u32 bpf_cpumask_first(const struct cpumask *cpumask) __weak __ksym;
+extern u32 bpf_cpumask_first_and(const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern u32 bpf_cpumask_first_zero(const struct cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_full(const struct cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_intersects(const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern void bpf_cpumask_or(struct bpf_cpumask *dst, const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern void bpf_cpumask_release(struct bpf_cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_set_cpu(u32 cpu, struct bpf_cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_setall(struct bpf_cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_subset(const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern bool bpf_cpumask_test_and_clear_cpu(u32 cpu, struct bpf_cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_test_and_set_cpu(u32 cpu, struct bpf_cpumask *cpumask) __weak __ksym;
+extern bool bpf_cpumask_test_cpu(u32 cpu, const struct cpumask *cpumask) __weak __ksym;
+extern u32 bpf_cpumask_weight(const struct cpumask *cpumask) __weak __ksym;
+extern void bpf_cpumask_xor(struct bpf_cpumask *dst, const struct cpumask *src1, const struct cpumask *src2) __weak __ksym;
+extern struct bpf_crypto_ctx *bpf_crypto_ctx_acquire(struct bpf_crypto_ctx *ctx) __weak __ksym;
+extern struct bpf_crypto_ctx *bpf_crypto_ctx_create(const struct bpf_crypto_params *params, u32 params__sz, int *err) __weak __ksym;
+extern void bpf_crypto_ctx_release(struct bpf_crypto_ctx *ctx) __weak __ksym;
+extern int bpf_crypto_decrypt(struct bpf_crypto_ctx *ctx, const struct bpf_dynptr *src, const struct bpf_dynptr *dst, const struct bpf_dynptr *siv__nullable) __weak __ksym;
+extern int bpf_crypto_encrypt(struct bpf_crypto_ctx *ctx, const struct bpf_dynptr *src, const struct bpf_dynptr *dst, const struct bpf_dynptr *siv__nullable) __weak __ksym;
+extern int bpf_dynptr_adjust(const struct bpf_dynptr *p, u32 start, u32 end) __weak __ksym;
+extern int bpf_dynptr_clone(const struct bpf_dynptr *p, struct bpf_dynptr *clone__uninit) __weak __ksym;
+extern int bpf_dynptr_from_skb(struct __sk_buff *s, u64 flags, struct bpf_dynptr *ptr__uninit) __weak __ksym;
+extern int bpf_dynptr_from_xdp(struct xdp_md *x, u64 flags, struct bpf_dynptr *ptr__uninit) __weak __ksym;
+extern bool bpf_dynptr_is_null(const struct bpf_dynptr *p) __weak __ksym;
+extern bool bpf_dynptr_is_rdonly(const struct bpf_dynptr *p) __weak __ksym;
+extern __u32 bpf_dynptr_size(const struct bpf_dynptr *p) __weak __ksym;
+extern void *bpf_dynptr_slice(const struct bpf_dynptr *p, u32 offset, void *buffer__opt, u32 buffer__szk) __weak __ksym;
+extern void *bpf_dynptr_slice_rdwr(const struct bpf_dynptr *p, u32 offset, void *buffer__opt, u32 buffer__szk) __weak __ksym;
+extern int bpf_fentry_test1(int a) __weak __ksym;
+extern void bpf_iter_bits_destroy(struct bpf_iter_bits *it) __weak __ksym;
+extern int bpf_iter_bits_new(struct bpf_iter_bits *it, const u64 *unsafe_ptr__ign, u32 nr_words) __weak __ksym;
+extern int *bpf_iter_bits_next(struct bpf_iter_bits *it) __weak __ksym;
+extern void bpf_iter_css_destroy(struct bpf_iter_css *it) __weak __ksym;
+extern int bpf_iter_css_new(struct bpf_iter_css *it, struct cgroup_subsys_state *start, unsigned int flags) __weak __ksym;
+extern struct cgroup_subsys_state *bpf_iter_css_next(struct bpf_iter_css *it) __weak __ksym;
+extern void bpf_iter_css_task_destroy(struct bpf_iter_css_task *it) __weak __ksym;
+extern int bpf_iter_css_task_new(struct bpf_iter_css_task *it, struct cgroup_subsys_state *css, unsigned int flags) __weak __ksym;
+extern struct task_struct *bpf_iter_css_task_next(struct bpf_iter_css_task *it) __weak __ksym;
+extern void bpf_iter_num_destroy(struct bpf_iter_num *it) __weak __ksym;
+extern int bpf_iter_num_new(struct bpf_iter_num *it, int start, int end) __weak __ksym;
+extern int *bpf_iter_num_next(struct bpf_iter_num *it) __weak __ksym;
+extern void bpf_iter_scx_dsq_destroy(struct bpf_iter_scx_dsq *it) __weak __ksym;
+extern int bpf_iter_scx_dsq_new(struct bpf_iter_scx_dsq *it, u64 dsq_id, u64 flags) __weak __ksym;
+extern struct task_struct *bpf_iter_scx_dsq_next(struct bpf_iter_scx_dsq *it) __weak __ksym;
+extern void bpf_iter_task_destroy(struct bpf_iter_task *it) __weak __ksym;
+extern int bpf_iter_task_new(struct bpf_iter_task *it, struct task_struct *task__nullable, unsigned int flags) __weak __ksym;
+extern struct task_struct *bpf_iter_task_next(struct bpf_iter_task *it) __weak __ksym;
+extern void bpf_iter_task_vma_destroy(struct bpf_iter_task_vma *it) __weak __ksym;
+extern int bpf_iter_task_vma_new(struct bpf_iter_task_vma *it, struct task_struct *task, u64 addr) __weak __ksym;
+extern struct vm_area_struct *bpf_iter_task_vma_next(struct bpf_iter_task_vma *it) __weak __ksym;
+extern void bpf_key_put(struct bpf_key *bkey) __weak __ksym;
+extern void bpf_kfunc_call_memb_release(struct prog_test_member *p) __weak __ksym;
+extern void bpf_kfunc_call_test_release(struct prog_test_ref_kfunc *p) __weak __ksym;
+extern struct bpf_list_node *bpf_list_pop_back(struct bpf_list_head *head) __weak __ksym;
+extern struct bpf_list_node *bpf_list_pop_front(struct bpf_list_head *head) __weak __ksym;
+extern int bpf_list_push_back_impl(struct bpf_list_head *head, struct bpf_list_node *node, void *meta__ign, u64 off) __weak __ksym;
+extern int bpf_list_push_front_impl(struct bpf_list_head *head, struct bpf_list_node *node, void *meta__ign, u64 off) __weak __ksym;
+extern struct bpf_key *bpf_lookup_system_key(u64 id) __weak __ksym;
+extern struct bpf_key *bpf_lookup_user_key(u32 serial, u64 flags) __weak __ksym;
+extern s64 bpf_map_sum_elem_count(const struct bpf_map *map) __weak __ksym;
+extern int bpf_modify_return_test(int a, int *b) __weak __ksym;
+extern int bpf_modify_return_test2(int a, int *b, short int c, int d, void *e, char f, int g) __weak __ksym;
+extern int bpf_modify_return_test_tp(int nonce) __weak __ksym;
+extern void bpf_obj_drop_impl(void *p__alloc, void *meta__ign) __weak __ksym;
+extern void *bpf_obj_new_impl(u64 local_type_id__k, void *meta__ign) __weak __ksym;
+extern void bpf_percpu_obj_drop_impl(void *p__alloc, void *meta__ign) __weak __ksym;
+extern void *bpf_percpu_obj_new_impl(u64 local_type_id__k, void *meta__ign) __weak __ksym;
+extern void bpf_preempt_disable(void) __weak __ksym;
+extern void bpf_preempt_enable(void) __weak __ksym;
+extern int bpf_rbtree_add_impl(struct bpf_rb_root *root, struct bpf_rb_node *node, bool (*less)(struct bpf_rb_node *, const struct bpf_rb_node *), void *meta__ign, u64 off) __weak __ksym;
+extern struct bpf_rb_node *bpf_rbtree_first(struct bpf_rb_root *root) __weak __ksym;
+extern struct bpf_rb_node *bpf_rbtree_remove(struct bpf_rb_root *root, struct bpf_rb_node *node) __weak __ksym;
+extern void bpf_rcu_read_lock(void) __weak __ksym;
+extern void bpf_rcu_read_unlock(void) __weak __ksym;
+extern void *bpf_rdonly_cast(const void *obj__ign, u32 btf_id__k) __weak __ksym;
+extern void *bpf_refcount_acquire_impl(void *p__refcounted_kptr, void *meta__ign) __weak __ksym;
+extern __u64 *bpf_session_cookie(void) __weak __ksym;
+extern bool bpf_session_is_return(void) __weak __ksym;
+extern int bpf_sk_assign_tcp_reqsk(struct __sk_buff *s, struct sock *sk, struct bpf_tcp_req_attrs *attrs, int attrs__sz) __weak __ksym;
+extern int bpf_sock_addr_set_sun_path(struct bpf_sock_addr_kern *sa_kern, const u8 *sun_path, u32 sun_path__sz) __weak __ksym;
+extern int bpf_sock_destroy(struct sock_common *sock) __weak __ksym;
+extern struct task_struct *bpf_task_acquire(struct task_struct *p) __weak __ksym;
+extern struct task_struct *bpf_task_from_pid(s32 pid) __weak __ksym;
+extern struct cgroup *bpf_task_get_cgroup1(struct task_struct *task, int hierarchy_id) __weak __ksym;
+extern void bpf_task_release(struct task_struct *p) __weak __ksym;
+extern long int bpf_task_under_cgroup(struct task_struct *task, struct cgroup *ancestor) __weak __ksym;
+extern void bpf_throw(u64 cookie) __weak __ksym;
+extern int bpf_verify_pkcs7_signature(struct bpf_dynptr *data_p, struct bpf_dynptr *sig_p, struct bpf_key *trusted_keyring) __weak __ksym;
+extern int bpf_wq_init(struct bpf_wq *wq, void *p__map, unsigned int flags) __weak __ksym;
+extern int bpf_wq_set_callback_impl(struct bpf_wq *wq, int (*callback_fn)(void *, int *, void *), unsigned int flags, void *aux__ign) __weak __ksym;
+extern int bpf_wq_start(struct bpf_wq *wq, unsigned int flags) __weak __ksym;
+extern struct xfrm_state *bpf_xdp_get_xfrm_state(struct xdp_md *ctx, struct bpf_xfrm_state_opts *opts, u32 opts__sz) __weak __ksym;
+extern int bpf_xdp_metadata_rx_hash(const struct xdp_md *ctx, u32 *hash, enum xdp_rss_hash_type *rss_type) __weak __ksym;
+extern int bpf_xdp_metadata_rx_timestamp(const struct xdp_md *ctx, u64 *timestamp) __weak __ksym;
+extern int bpf_xdp_metadata_rx_vlan_tag(const struct xdp_md *ctx, __be16 *vlan_proto, u16 *vlan_tci) __weak __ksym;
+extern void bpf_xdp_xfrm_state_release(struct xfrm_state *x) __weak __ksym;
+extern void cgroup_rstat_flush(struct cgroup *cgrp) __weak __ksym;
+extern void cgroup_rstat_updated(struct cgroup *cgrp, int cpu) __weak __ksym;
+extern void cubictcp_acked(struct sock *sk, const struct ack_sample *sample) __weak __ksym;
+extern void cubictcp_cong_avoid(struct sock *sk, u32 ack, u32 acked) __weak __ksym;
+extern void cubictcp_cwnd_event(struct sock *sk, enum tcp_ca_event event) __weak __ksym;
+extern void cubictcp_init(struct sock *sk) __weak __ksym;
+extern u32 cubictcp_recalc_ssthresh(struct sock *sk) __weak __ksym;
+extern void cubictcp_state(struct sock *sk, u8 new_state) __weak __ksym;
+extern bool scx_bpf_consume(u64 dsq_id) __weak __ksym;
+extern struct rq *scx_bpf_cpu_rq(s32 cpu) __weak __ksym;
+extern u32 scx_bpf_cpuperf_cap(s32 cpu) __weak __ksym;
+extern u32 scx_bpf_cpuperf_cur(s32 cpu) __weak __ksym;
+extern void scx_bpf_cpuperf_set(s32 cpu, u32 perf) __weak __ksym;
+extern s32 scx_bpf_create_dsq(u64 dsq_id, s32 node) __weak __ksym;
+extern void scx_bpf_destroy_dsq(u64 dsq_id) __weak __ksym;
+extern void scx_bpf_dispatch(struct task_struct *p, u64 dsq_id, u64 slice, u64 enq_flags) __weak __ksym;
+extern void scx_bpf_dispatch_cancel(void) __weak __ksym;
+extern bool scx_bpf_dispatch_from_dsq(struct bpf_iter_scx_dsq *it__iter, struct task_struct *p, u64 dsq_id, u64 enq_flags) __weak __ksym;
+extern void scx_bpf_dispatch_from_dsq_set_slice(struct bpf_iter_scx_dsq *it__iter, u64 slice) __weak __ksym;
+extern void scx_bpf_dispatch_from_dsq_set_vtime(struct bpf_iter_scx_dsq *it__iter, u64 vtime) __weak __ksym;
+extern u32 scx_bpf_dispatch_nr_slots(void) __weak __ksym;
+extern void scx_bpf_dispatch_vtime(struct task_struct *p, u64 dsq_id, u64 slice, u64 vtime, u64 enq_flags) __weak __ksym;
+extern bool scx_bpf_dispatch_vtime_from_dsq(struct bpf_iter_scx_dsq *it__iter, struct task_struct *p, u64 dsq_id, u64 enq_flags) __weak __ksym;
+extern s32 scx_bpf_dsq_nr_queued(u64 dsq_id) __weak __ksym;
+extern void scx_bpf_dump_bstr(char *fmt, long long unsigned int *data, u32 data__sz) __weak __ksym;
+extern void scx_bpf_error_bstr(char *fmt, long long unsigned int *data, u32 data__sz) __weak __ksym;
+extern void scx_bpf_exit_bstr(s64 exit_code, char *fmt, long long unsigned int *data, u32 data__sz) __weak __ksym;
+extern const struct cpumask *scx_bpf_get_idle_cpumask(void) __weak __ksym;
+extern const struct cpumask *scx_bpf_get_idle_smtmask(void) __weak __ksym;
+extern const struct cpumask *scx_bpf_get_online_cpumask(void) __weak __ksym;
+extern const struct cpumask *scx_bpf_get_possible_cpumask(void) __weak __ksym;
+extern void scx_bpf_kick_cpu(s32 cpu, u64 flags) __weak __ksym;
+extern u32 scx_bpf_nr_cpu_ids(void) __weak __ksym;
+extern s32 scx_bpf_pick_any_cpu(const struct cpumask *cpus_allowed, u64 flags) __weak __ksym;
+extern s32 scx_bpf_pick_idle_cpu(const struct cpumask *cpus_allowed, u64 flags) __weak __ksym;
+extern void scx_bpf_put_cpumask(const struct cpumask *cpumask) __weak __ksym;
+extern void scx_bpf_put_idle_cpumask(const struct cpumask *idle_mask) __weak __ksym;
+extern u32 scx_bpf_reenqueue_local(void) __weak __ksym;
+extern s32 scx_bpf_select_cpu_dfl(struct task_struct *p, s32 prev_cpu, u64 wake_flags, bool *is_idle) __weak __ksym;
+extern struct cgroup *scx_bpf_task_cgroup(struct task_struct *p) __weak __ksym;
+extern s32 scx_bpf_task_cpu(const struct task_struct *p) __weak __ksym;
+extern bool scx_bpf_task_running(const struct task_struct *p) __weak __ksym;
+extern bool scx_bpf_test_and_clear_cpu_idle(s32 cpu) __weak __ksym;
+extern void tcp_cong_avoid_ai(struct tcp_sock *tp, u32 w, u32 acked) __weak __ksym;
+extern void tcp_reno_cong_avoid(struct sock *sk, u32 ack, u32 acked) __weak __ksym;
+extern u32 tcp_reno_ssthresh(struct sock *sk) __weak __ksym;
+extern u32 tcp_reno_undo_cwnd(struct sock *sk) __weak __ksym;
+extern u32 tcp_slow_start(struct tcp_sock *tp, u32 acked) __weak __ksym;
 #endif
 
 #ifndef BPF_NO_PRESERVE_ACCESS_INDEX
