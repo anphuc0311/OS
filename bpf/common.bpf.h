@@ -25,7 +25,6 @@
 #include <bpf/bpf_tracing.h>
 #include <asm-generic/errno.h>
 #include "user_exit_info.bpf.h"
-#include "
 #include "enum_defs.autogen.h"
 
 #define PF_IDLE				0x00000002	/* I am an IDLE thread */
@@ -48,7 +47,7 @@
 extern int LINUX_KERNEL_VERSION __kconfig;
 extern const char CONFIG_CC_VERSION_TEXT[64] __kconfig __weak;
 extern const char CONFIG_LOCALVERSION[64] __kconfig __weak;
-
+struct scx_event_stats;
 /*
  * Earlier versions of clang/pahole lost upper 32bits in 64bit enums which can
  * lead to really confusing misbehaviors. Let's trigger a build failure.

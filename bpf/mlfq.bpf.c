@@ -6,8 +6,9 @@
 //#include <bpf/bpf_struct_ops.h>
 #include <linux/sched/ext.h>
 #include <bpf/bpf_core_read.h>
-#include "scx_common.bpf.h"
- #include "common.h"
+//#include "scx_common.bpf.h"
+#include "common.h"
+#include "common.bpf.h"
 
 char LICENSE[] SEC("license") = "GPL";
 
@@ -99,9 +100,9 @@ struct {
 
 
 /* --- INIT --- */
-SEC("struct_ops/init_task")
-//*s32*/ int BPF_STRUCT_OPS_SLEEPABLE(mlfq_init) {
-s32 mlfq_init_task(struct task_struct *p, struct scx_init_task_args *args){
+//SEC("struct_ops/init_task")
+int BPF_STRUCT_OPS_SLEEPABLE(mlfq_init) {
+//s32 mlfq_init_task(struct task_struct *p, struct scx_init_task_args *args){
 //static int mlfq_init(void)
 //{
     /* Initialize DSQs */
@@ -204,7 +205,7 @@ void BPF_PROG(mlfq_enqueue, struct task_struct *p, u64 enq_flags)
     }
 
     
-    scx_bpf_dispatch(p, lvl,slice, enq_flags);
+    scx_bpf_dsq_insert(p, lvl,slice, enq_flags);
     int cpu = BPF_CORE_READ(p, thread_info.cpu);
     if (cpu >= 0 && cpu < MAX_CPUS) {
         u32 cpu_idx = (u32)cpu;
@@ -283,7 +284,7 @@ void BPF_STRUCT_OPS(mlfq_dispatch, s32 cpu, struct task_struct *prev)
 
     /* Dispatch tasks */
     for (int i = 0; i < NUM_DSQ; i++) {
-        if (scx_bpf_consume(i))
+        if (scx_bpf_dsq_move_to_local(i))
             return;
     }
 }
@@ -384,13 +385,14 @@ struct sched_ext_ops mlfq_ops = {
 
 SEC(".struct_ops")
 struct sched_ext_ops mlfq_ops = {
-    .init_task  = (void *)mlfq_init_task,
-    .enable     = mlfq_enable,
+    //.init_task  = (void *)mlfq_init_task,
+    .init       = (void *)mlfq_init,
+    .enable     = (void *)mlfq_enable,
     .enqueue    = (void *)mlfq_enqueue,
-    .dispatch   = mlfq_dispatch,
-    .stopping   = mlfq_stopping,
-    .running    = mlfq_running,
-    .exit       = mlfq_exit,
+    .dispatch   = (void *)mlfq_dispatch,
+    .stopping   = (void *)mlfq_stopping,
+    .running    = (void *)mlfq_running,
+    .exit       = (void *)mlfq_exit,
     .exit_task  = (void *)mlfq_exit_task,
     .name       = "mlfq",
     .flags      = SCX_OPS_KEEP_BUILTIN_IDLE,

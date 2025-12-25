@@ -14,7 +14,7 @@ ARCH := $(shell uname -m | sed 's/x86_64/x86/' | sed 's/aarch64/arm64/')
 # Include Paths
 # Sử dụng wildcard hoặc uname -r để đường dẫn header linh hoạt hơn
 KERNEL_HEADERS := /usr/src/linux-headers-$(shell uname -r)/include
-INCLUDES := -I$(OUTPUT) -I. -Ibpf -I/usr/include -I/usr/src/linux-headers-6.12.47+rpt-common-rpi/include
+INCLUDES := -I$(OUTPUT) -I. -Ibpf -I/usr/include -I/usr/src/linux-headers-6.12.47+rpt-common-rpi/include -I$(HOME)/scx/scheds/include/scx
 
 # Flags
 BPF_CFLAGS := -g -O2 -target bpf -mcpu=v3 -D__TARGET_ARCH_$(ARCH) $(INCLUDES)
