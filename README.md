@@ -43,7 +43,7 @@ Dự án bao gồm hai phần chính:
 .
 ├── bpf/
 │   ├── mlfq.bpf.c          # Chương trình eBPF hiện thực MLFQ
-│   ├── scx_common.bpf.h    # Helper và macro cho sched_ext
+│   ├── common.bpf.h        # Helper và macro cho sched_ext
 │   └── vmlinux.h           # BTF header
 ├── user/
 │   ├── main.c              # Chương trình user-space loader
