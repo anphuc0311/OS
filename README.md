@@ -113,9 +113,16 @@ Sau khi chạy thành công, scheduler MLFQ sẽ được đăng ký và thay th
 
 Chi tiết đánh giá hiệu năng bằng:
 `stress-ng --cpu 4 --cpu-method matrixprod --timeout 30s --metrics-brief`
+
 Kết quả:
+
 TH1: Khi sử dụng cơ chế lập lịch mặc định của Raspberry Pi
 
+![Default Scheduling Result](Images/Default_Schedule.png)
+
+TH2: Khi sử dụng cơ chế lập lịch MLFQ cho Raspberry Pi
+
+![MLFQ Scheduling Result](Images/MLFQ_Schedule.png)
 
 ## Hạn chế
 
