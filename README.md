@@ -1,4 +1,4 @@
-# MLFQ Scheduler using `sched_ext`
+# MLFQ Scheduler using `sched_ext` for Raspberry Pi 4B
 
 ## Giới thiệu
 
@@ -96,6 +96,7 @@ Luồng xử lý chính:
 ## Build và chạy
 
 ```bash
+make clean
 make
 sudo ./mlfq_runner
 ```
@@ -110,12 +111,11 @@ Sau khi chạy thành công, scheduler MLFQ sẽ được đăng ký và thay th
 - Tiến trình tương tác được phản hồi nhanh hơn so với FIFO đơn giản
 - Không cần patch kernel, dễ thử nghiệm và rollback
 
-Chi tiết đánh giá hiệu năng có thể mở rộng thêm bằng:
-- `perf`
-- `schedstat`
-- workload benchmark (hackbench, stress-ng, …)
+Chi tiết đánh giá hiệu năng bằng:
+`stress-ng --cpu 4 --cpu-method matrixprod --timeout 30s --metrics-brief`
+Kết quả:
+TH1: Khi sử dụng cơ chế lập lịch mặc định của Raspberry Pi
 
----
 
 ## Hạn chế
 
