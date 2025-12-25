@@ -115,14 +115,17 @@ int BPF_STRUCT_OPS_SLEEPABLE(mlfq_init) {
     } */
     /* FIX: Initialize aging cursor to -1 (sentinel) */
     /* Map mặc định là 0, ta cần set -1 để báo hiệu "bắt đầu từ đầu" */
-    /*for (u32 i = 0; i < 4; i++) {
-        bpf_map_update_elem(&dsq_trigger, &i, &i, BPF_ANY);
-    }*/
-    bpf_map_update_elem(&dsq_trigger, &(u32){0}, &(u32){0}, BPF_ANY);
+    #pragma unroll
+    for (int i = 0; i < 4; i++) {
+	int key = i;
+	scx_bpf_create_dsq(i,-1);
+        bpf_map_update_elem(&dsq_trigger, &key, &key, BPF_ANY);
+    }
+    /*bpf_map_update_elem(&dsq_trigger, &(u32){0}, &(u32){0}, BPF_ANY);
     bpf_map_update_elem(&dsq_trigger, &(u32){1}, &(u32){1}, BPF_ANY);
     bpf_map_update_elem(&dsq_trigger, &(u32){2}, &(u32){2}, BPF_ANY);
     bpf_map_update_elem(&dsq_trigger, &(u32){3}, &(u32){3}, BPF_ANY);
-
+*/
     u32 idx = 0;
     s32 start_sentinel = -1;
     bpf_map_update_elem(&aging_cursor, &idx, &start_sentinel, BPF_ANY);
